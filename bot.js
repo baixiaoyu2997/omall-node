@@ -105,9 +105,11 @@ async function getPic(path, text) {
   await page.goto(omallTop.pageUrl, {
     waitUntil: 'networkidle0'
   }) //跳转
-  const appNavArr = Array.from(await page.$$('.app-nav a'));
-  console.log(appNavArr[0].innerText)
-  
+  const appNavArr = await page.evaluate(() =>
+  { 
+    return [...document.querySelectorAll('.app-nav a')]
+  })
+
   await page.screenshot({
     path,
     type: 'jpeg',
