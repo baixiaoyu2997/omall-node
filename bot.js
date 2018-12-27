@@ -88,7 +88,7 @@ async function messageHandler(message, user2) {
     await getPic(page.imgUrl, message.text())
     const img = await FileBox.fromFile(page.imgUrl);
     message[user2 ? 'from' : 'to']().say(img)
-    message[user2 ? 'from' : 'to']().say(omallTop.pageUrl)
+    message[user2 ? 'from' : 'to']().say("洋葱热卖榜单："+omallTop.pageUrl)
   } else if (message.text() === ' 帮助') {
     const helpInfo = Object.values(omallTop).reduce((x, y) => {
       return x + (y.matchMsg || '')
@@ -114,15 +114,13 @@ async function getPic(path, text) {
       return item.innerText.includes(text.trim())
     })
   }, text);
-  // 点击nav显示商品列表
-  await page.click(`.app-menu li:nth-child(${navIndex + 1})`)
-  // 监听接口完成
-  // await page.on('requestfinished', request => {
-  //   if (request.resourceType() === 'image' && request.url().includes('aborder')) {
-  //     // 截图
-  //   }
-  // })
-  await page.waitForResponse(response => response.url().includes('aborder'));
+
+  if (navIndex !== 0) {
+    // 点击nav显示商品列表
+    await page.click(`.app-menu li:nth-child(${navIndex + 1})`)
+    // 等待图片加载完成
+    await page.waitForResponse(response => response.url().includes('aborder'));
+  }
 
   await page.screenshot({
     path,
