@@ -85,8 +85,9 @@ function cornHandler() {
 async function messageHandler(message, user2) {
   let page = omallTop[Object.keys(omallTop).find(obj => omallTop[obj].matchMsg === message.text())]
   if (page) {
-    getPic(page.imgUrl, message.text())
-    message[user2 ? 'from' : 'to']().say(FileBox.fromFile(page.imgUrl))
+    await getPic(page.imgUrl, message.text())
+    const img = await FileBox.fromFile(page.imgUrl);
+    message[user2 ? 'from' : 'to']().say(img)
     message[user2 ? 'from' : 'to']().say(omallTop.pageUrl)
   } else if (message.text() === ' 帮助') {
     const helpInfo = Object.values(omallTop).reduce((x, y) => {
@@ -104,12 +105,7 @@ async function getPic(path, text) {
   await page.emulate(iPhonex)
   await page.goto(omallTop.pageUrl, {
     waitUntil: 'networkidle0'
-  }) //跳转
-  const appNavArr = await page.evaluate(() =>
-  { 
-    return [...document.querySelectorAll('.app-nav a')]
-  })
-
+  }) 
   await page.screenshot({
     path,
     type: 'jpeg',
