@@ -100,12 +100,30 @@ async function messageHandler(message, user2) {
 }
 
 async function getPic(path, text) {
-  const browser = await puppeteer.launch()
+  const browser = await puppeteer.launch({
+    headless: false
+  })
   const page = await browser.newPage()
   await page.emulate(iPhonex)
   await page.goto(omallTop.pageUrl, {
     waitUntil: 'networkidle0'
-  }) 
+  })
+  // 找到文字对应nav
+  const navIndex = await page.evaluate(text => {
+    return [...document.querySelectorAll('.app-menu li')].findIndex(item => {
+      return item.innerText.includes(text.trim())
+    })
+  }, text);
+  // 点击nav显示商品列表
+  await page.click(`.app-menu li:nth-child(${navIndex + 1})`)
+  // 监听接口完成
+  // await page.on('requestfinished', request => {
+  //   if (request.resourceType() === 'image' && request.url().includes('aborder')) {
+  //     // 截图
+  //   }
+  // })
+  await page.waitForResponse(response => response.url().includes('aborder'));
+
   await page.screenshot({
     path,
     type: 'jpeg',
