@@ -8,7 +8,9 @@ const CronJob = require('cron').CronJob
 const puppeteer = require('puppeteer')
 const devices = require('puppeteer/DeviceDescriptors')
 const iPhonex = devices['iPhone X']
-const user2 = {
+
+let omall_room = {}
+let user2 = {
   alias: '小<img class="emoji emoji1f424" text="_web" src="/zh_CN/htmledition/v2/images/spacer.gif" />崽'
 }
 
@@ -49,14 +51,20 @@ let omallTop = {
         )}`
       )
     )
-    .on('login', async user => {
+    .on('login', async user =>
+    {
+      // 注册用户2
       user2.contact = await bot.Contact.find({
         alias: user2.alias
       })
+      // 群赋值
+      omall_room = await bot.Room.find({
+        topic: /洋葱海外优享/
+      })
       console.log(`User ${user} logined`)
     })
-    .on('message', async message => {
-      // const room = await bot.Room.find('订单组')
+    .on('message', async message =>
+    {
       if (message.to().id === 'filehelper') {
         // await room.say(fileBox)
         messageHandler(message)
@@ -85,10 +93,10 @@ function cornHandler() {
 async function messageHandler(message, user2) {
   let page = omallTop[Object.keys(omallTop).find(obj => omallTop[obj].matchMsg === message.text())]
   if (page) {
-    await getPic(page.imgUrl, message.text())
+     getPic(page.imgUrl, message.text())
     const img = await FileBox.fromFile(page.imgUrl);
     message[user2 ? 'from' : 'to']().say(img)
-    message[user2 ? 'from' : 'to']().say("洋葱热卖榜单："+omallTop.pageUrl)
+    message[user2 ? 'from' : 'to']().say("洋葱热卖榜单：" + omallTop.pageUrl)
   } else if (message.text() === ' 帮助') {
     const helpInfo = Object.values(omallTop).reduce((x, y) => {
       return x + (y.matchMsg || '')
@@ -101,7 +109,7 @@ async function messageHandler(message, user2) {
 
 async function getPic(path, text) {
   const browser = await puppeteer.launch({
-    headless: false
+    // headless: false
   })
   const page = await browser.newPage()
   await page.emulate(iPhonex)
@@ -134,3 +142,15 @@ async function getPic(path, text) {
   })
   await browser.close()
 }
+
+process.on('uncaughtException', function (error)
+{
+  console.error('uncaughtException', error);
+  process.exit(1);
+});
+// 当没有对 Promise 的 rejection 进行处理就会抛出这个事件（这只对原生 Promise 有效）
+process.on('unhandledRejection', function (error)
+{
+  console.error('unhandledRejection', error);
+  process.exit(1);
+});
