@@ -93,7 +93,7 @@ function cornHandler() {
 async function messageHandler(message, user2) {
   let page = omallTop[Object.keys(omallTop).find(obj => omallTop[obj].matchMsg === message.text())]
   if (page) {
-     getPic(page.imgUrl, message.text())
+    await getPic(page.imgUrl, message.text())
     const img = await FileBox.fromFile(page.imgUrl);
     message[user2 ? 'from' : 'to']().say(img)
     message[user2 ? 'from' : 'to']().say("洋葱热卖榜单：" + omallTop.pageUrl)
