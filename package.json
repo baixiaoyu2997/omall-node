@@ -10,9 +10,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.18.0",
     "cron": "^1.6.0",
     "file-box": "^0.8.27",
     "puppeteer": "^1.11.0",
+    "puppeteer-cn": "^0.1.8",
+    "request-promise": "^4.2.2",
     "wechaty": "^0.22.6"
   }
 }

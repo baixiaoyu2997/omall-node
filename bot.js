@@ -5,10 +5,11 @@ const {
   Wechaty
 } = require('wechaty')
 const CronJob = require('cron').CronJob
-const puppeteer = require('puppeteer')
+const puppeteer = require('puppeteer-cn')
 const devices = require('puppeteer/DeviceDescriptors')
 const iPhonex = devices['iPhone X']
-
+const request = require('request-promise')
+const serverChanURL='http://sc.ftqq.com/SCU38429T43c27922fdf539ec0a9791d088c10f4f5c273333a8114.send'
 let omall_room = {}
 let user2 = {
   alias: '小<img class="emoji emoji1f424" text="_web" src="/zh_CN/htmledition/v2/images/spacer.gif" />崽'
@@ -51,8 +52,7 @@ let omallTop = {
         )}`
       )
     )
-    .on('login', async user =>
-    {
+    .on('login', async user => {
       // 注册用户2
       user2.contact = await bot.Contact.find({
         alias: user2.alias
@@ -63,8 +63,7 @@ let omallTop = {
       })
       console.log(`User ${user} logined`)
     })
-    .on('message', async message =>
-    {
+    .on('message', async message => {
       if (message.to().id === 'filehelper') {
         // await room.say(fileBox)
         messageHandler(message)
@@ -107,9 +106,11 @@ async function messageHandler(message, user2) {
   }
 }
 
+// 获取截图
 async function getPic(path, text) {
   const browser = await puppeteer.launch({
     // headless: false
+    executablePath: "./puppeteer/chrome-win/chrome.exe"
   })
   const page = await browser.newPage()
   await page.emulate(iPhonex)
@@ -137,20 +138,30 @@ async function getPic(path, text) {
       x: 0,
       y: 290,
       width: 375.2,
-      height: 1340 //1340
+      height: 4000 //1340
     }
   })
   await browser.close()
 }
+// 发送警告到手机
+async function sendMessage(title, content) {
+  let result = JSON.parse(await request(serverChanURL, {
+    qs: {
+      text: title,
+      desp: content
+    }
+  }));
+  if (result.errno !== 0) throw new Error(result.errmsg);
+};
 
-process.on('uncaughtException', function (error)
-{
+process.on('uncaughtException', async function (error) {
   console.error('uncaughtException', error);
+  await sendMessage('uncaughtException', error.message)
   process.exit(1);
 });
 // 当没有对 Promise 的 rejection 进行处理就会抛出这个事件（这只对原生 Promise 有效）
-process.on('unhandledRejection', function (error)
-{
+process.on('unhandledRejection', async function (error) {
   console.error('unhandledRejection', error);
+  await sendMessage('unhandledRejection', error.message)
   process.exit(1);
 });

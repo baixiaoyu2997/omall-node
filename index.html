@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <script src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.min.js"></script>
+</head>
+
+<body>
+
+  <script>
+    axios.post('https://sc.ftqq.com/SCU38429T43c27922fdf539ec0a9791d088c10f4f5c273333a8114.send', {
+      text: '服务停止！',
+      desp: '是的'
+    }).then((res) => {
+      console.log(1111111111111);
+    }).catch((err) => {
+      console.log(2222222222222);
+      console.log(err);
+    })
+  </script>
+</body>
+
+</html>
