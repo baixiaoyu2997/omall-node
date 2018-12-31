@@ -9,39 +9,43 @@ const puppeteer = require('puppeteer-cn')
 const devices = require('puppeteer/DeviceDescriptors')
 const iPhonex = devices['iPhone X']
 const request = require('request-promise')
-const serverChanURL='http://sc.ftqq.com/SCU38429T43c27922fdf539ec0a9791d088c10f4f5c273333a8114.send'
-let omall_room = {}
-let user2 = {
-  alias: '小<img class="emoji emoji1f424" text="_web" src="/zh_CN/htmledition/v2/images/spacer.gif" />崽'
-}
+const serverChanURL = 'http://sc.ftqq.com/SCU38429T43c27922fdf539ec0a9791d088c10f4f5c273333a8114.send'
+let userArr = [{
+  alias: 'self',
+  room: '测试群',
+  webPageURL: 'https://m.msyc.cc/wx/actapp/hotsale/index.html?id=21&tmn=312954'
+}, {
+  alias: '小<img class="emoji emoji1f424" text="_web" src="/zh_CN/htmledition/v2/images/spacer.gif" />崽',
+  room: '洋葱海外优享',
+  webPageURL: 'https://m.msyc.cc/wx/actapp/hotsale/index.html?id=21&tmn=312954'
+}]
 
 let omallTop = {
   beautyPage: {
     matchMsg: ' 美护',
-    imgUrl: 'beauty.jpeg'
+    imgURL: 'beauty.jpeg'
   },
   healthPage: {
     matchMsg: ' 保健',
-    imgUrl: 'health.jpeg'
+    imgURL: 'health.jpeg'
   },
   babyPage: {
     matchMsg: ' 母婴',
-    imgUrl: 'baby.jpeg'
+    imgURL: 'baby.jpeg'
   },
   morePage: {
     matchMsg: ' 综合',
-    imgUrl: 'more.jpeg'
+    imgURL: 'more.jpeg'
   },
   hotSalesPage: {
     matchMsg: ' 每日',
-    imgUrl: 'hotSales.jpeg'
-  },
-  pageUrl: 'https://m.msyc.cc/wx/actapp/hotsale/index.html?id=21&tmn=312954'
+    imgURL: 'hotSales.jpeg'
+  }
 };
 (async function () {
   cornHandler() //启动定时器任务
 
-  const bot = new Wechaty({
+  bot = new Wechaty({
     name: '机器人'
   })
   bot
@@ -53,22 +57,16 @@ let omallTop = {
       )
     )
     .on('login', async user => {
-      // 注册用户2
-      user2.contact = await bot.Contact.find({
-        alias: user2.alias
-      })
-      // 群赋值
-      omall_room = await bot.Room.find({
-        topic: /洋葱海外优享/
-      })
       console.log(`User ${user} logined`)
     })
     .on('message', async message => {
+      if (message.self() && message.room()) return // 过滤发送消息
       if (message.to().id === 'filehelper') {
-        // await room.say(fileBox)
-        messageHandler(message)
-      } else if (await message.from().alias() === user2.alias) {
-        messageHandler(message, user2)
+        messageHandler(message, userArr.find(x => x.alias === 'self'))
+      } else {
+        const fromAlias = await message.from().alias()
+        const user = userArr.find(x => fromAlias === x.alias)
+        if (user) messageHandler(message, user)
       }
     })
 
@@ -89,32 +87,36 @@ function cornHandler() {
 }
 
 // 处理消息指令
-async function messageHandler(message, user2) {
+async function messageHandler(message, user) {
   let page = omallTop[Object.keys(omallTop).find(obj => omallTop[obj].matchMsg === message.text())]
   if (page) {
-    await getPic(page.imgUrl, message.text())
-    const img = await FileBox.fromFile(page.imgUrl);
-    message[user2 ? 'from' : 'to']().say(img)
-    message[user2 ? 'from' : 'to']().say("洋葱热卖榜单：" + omallTop.pageUrl)
+    // 获取群
+    const omall_room = await bot.Room.find({
+      topic: user.room
+    })
+    await getPic(page.imgURL, message.text(), user.webPageURL)
+    const img = await FileBox.fromFile(page.imgURL);
+    await omall_room.say(img)
+    await omall_room.say("洋葱热卖榜单：" + user.webPageURL)
   } else if (message.text() === ' 帮助') {
     const helpInfo = Object.values(omallTop).reduce((x, y) => {
       return x + (y.matchMsg || '')
     }, '')
-    message[user2 ? 'from' : 'to']().say(`帮助：${helpInfo}`)
+    message[user.alias !== 'self' ? 'from' : 'to']().say(`帮助：${helpInfo}`)
   } else {
     return
   }
 }
 
 // 获取截图
-async function getPic(path, text) {
+async function getPic(path, text, webPageURL) {
   const browser = await puppeteer.launch({
     // headless: false
     executablePath: "./puppeteer/chrome-win/chrome.exe"
   })
   const page = await browser.newPage()
   await page.emulate(iPhonex)
-  await page.goto(omallTop.pageUrl, {
+  await page.goto(webPageURL, {
     waitUntil: 'networkidle0'
   })
   // 找到文字对应nav
