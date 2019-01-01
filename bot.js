@@ -76,9 +76,17 @@ let omallTop = {
 // 定时任务
 function cornHandler() {
   new CronJob(
-    '0 0 12,18-21 * * *', //每天12点触发一次
-    function () {
-      console.log('整点报时了~~~~')
+    '0 0 12,18,20 * * *', //每天12点触发一次
+    function ()
+    {
+      const omallTopKeys=Object.keys(omallTop)
+      const message = {
+        text ()
+        { 
+          return omallTop[omallTopKeys[RandomNumBoth(0,omallTopKeys.length)]].matchMsg
+        }
+      }
+      messageHandler(message,userArr.find(x => x.alias === '小<img class="emoji emoji1f424" text="_web" src="/zh_CN/htmledition/v2/images/spacer.gif" />崽'))
     },
     null,
     true,
@@ -155,6 +163,14 @@ async function sendMessage(title, content) {
   }));
   if (result.errno !== 0) throw new Error(result.errmsg);
 };
+
+// 随机数
+function RandomNumBoth(Min,Max){
+  var Range = Max - Min;
+  var Rand = Math.random();
+  var num = Min + Math.round(Rand * Range); //四舍五入
+  return num;
+}
 
 process.on('uncaughtException', async function (error) {
   console.error('uncaughtException', error);
