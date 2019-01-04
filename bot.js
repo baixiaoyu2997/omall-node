@@ -43,7 +43,6 @@ let omallTop = {
   }
 };
 (async function () {
-  cornHandler() //启动定时器任务
 
   bot = new Wechaty({
     name: '机器人'
@@ -57,6 +56,7 @@ let omallTop = {
       )
     )
     .on('login', async user => {
+      cornHandler() //启动定时器任务
       console.log(`User ${user} logined`)
     })
     .on('message', async message => {
@@ -77,16 +77,14 @@ let omallTop = {
 function cornHandler() {
   new CronJob(
     '0 0 12,18,20 * * *', //每天12点触发一次
-    function ()
-    {
-      const omallTopKeys=Object.keys(omallTop)
+    function () {
+      const omallTopKeys = Object.keys(omallTop)
       const message = {
-        text ()
-        { 
-          return omallTop[omallTopKeys[RandomNumBoth(0,omallTopKeys.length)]].matchMsg
+        text() {
+          return omallTop[omallTopKeys[RandomNumBoth(0, omallTopKeys.length - 1)]].matchMsg
         }
       }
-      messageHandler(message,userArr.find(x => x.alias === '小<img class="emoji emoji1f424" text="_web" src="/zh_CN/htmledition/v2/images/spacer.gif" />崽'))
+      messageHandler(message, userArr.find(x => x.alias === '小<img class="emoji emoji1f424" text="_web" src="/zh_CN/htmledition/v2/images/spacer.gif" />崽'))
     },
     null,
     true,
@@ -165,7 +163,7 @@ async function sendMessage(title, content) {
 };
 
 // 随机数
-function RandomNumBoth(Min,Max){
+function RandomNumBoth(Min, Max) {
   var Range = Max - Min;
   var Rand = Math.random();
   var num = Min + Math.round(Rand * Range); //四舍五入
