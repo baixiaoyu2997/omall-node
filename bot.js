@@ -76,10 +76,9 @@ let omallTop = {
 // 定时任务
 function cornHandler() {
   new CronJob(
-    '0 0 9,12,18,20 * * *', //每天12点触发一次
+    '0 0 9,12,18,20 * * *',
     function ()
     {
-      console.log(new Date());
       const omallTopKeys = Object.keys(omallTop)
       const message = {
         text() {
@@ -100,7 +99,7 @@ async function messageHandler(message, user) {
   if (page) {
     // 获取群
     const omall_room = await bot.Room.find({
-      topic: user.room
+      topic: new RegExp(user.room)
     })
     await getPic(page.imgURL, message.text(), user.webPageURL)
     const img = await FileBox.fromFile(page.imgURL);
