@@ -76,8 +76,10 @@ let omallTop = {
 // 定时任务
 function cornHandler() {
   new CronJob(
-    '0 0 12,18,20 * * *', //每天12点触发一次
-    function () {
+    '0 0 9,12,18,20 * * *', //每天12点触发一次
+    function ()
+    {
+      console.log(new Date());
       const omallTopKeys = Object.keys(omallTop)
       const message = {
         text() {
