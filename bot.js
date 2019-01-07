@@ -150,7 +150,7 @@ async function getPic(path, text, webPageURL) {
       x: 0,
       y: 290,
       width: 375.2,
-      height: 3600 //1340
+      height: 3800 // 图片不能大于1M
     }
   })
   await browser.close()
