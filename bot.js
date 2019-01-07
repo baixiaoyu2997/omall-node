@@ -103,7 +103,10 @@ async function messageHandler(message, user) {
     })
     await getPic(page.imgURL, message.text(), user.webPageURL)
     const img = await FileBox.fromFile(page.imgURL);
-    await omall_room.say(img)
+    await omall_room.say(img).catch(err =>
+    { 
+      console.log(err);
+    })
     await omall_room.say("洋葱热卖榜单：" + user.webPageURL)
   } else if (message.text() === ' 帮助') {
     const helpInfo = Object.values(omallTop).reduce((x, y) => {
@@ -147,7 +150,7 @@ async function getPic(path, text, webPageURL) {
       x: 0,
       y: 290,
       width: 375.2,
-      height: 4000 //1340
+      height: 3600 //1340
     }
   })
   await browser.close()
