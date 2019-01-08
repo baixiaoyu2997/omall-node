@@ -97,13 +97,17 @@ function cornHandler() {
 async function messageHandler (message, user)
 {
   console.log('messageHandler开始');
-  let page = omallTop[Object.keys(omallTop).find(obj => omallTop[obj].matchMsg === message.text())]
+  const messageText = message.text()
+  console.log(messageText);
+  console.log(Object.keys(omallTop).find(obj => omallTop[obj].matchMsg === messageText));
+  let page = omallTop[Object.keys(omallTop).find(obj => omallTop[obj].matchMsg === messageText)]
+  console.log(page);
   if (page) {
     // 获取群
     const omall_room = await bot.Room.find({
       topic: new RegExp(user.room)
     })
-    await getPic(page.imgURL, message.text(), user.webPageURL)
+    await getPic(page.imgURL, messageText, user.webPageURL)
     const img = await FileBox.fromFile(page.imgURL);
     console.log("发送图片");
     await omall_room.say(img).catch(err =>
@@ -112,7 +116,7 @@ async function messageHandler (message, user)
     })
     console.log("发送图片结束");
     await omall_room.say("洋葱热卖榜单：" + user.webPageURL)
-  } else if (message.text() === ' 帮助') {
+  } else if (messageText === ' 帮助') {
     const helpInfo = Object.values(omallTop).reduce((x, y) => {
       return x + (y.matchMsg || '')
     }, '')
