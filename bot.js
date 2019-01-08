@@ -135,7 +135,7 @@ async function getPic(path, text, webPageURL) {
   const page = await browser.newPage()
   await page.emulate(iPhonex)
   await page.goto(webPageURL, {
-    waitUntil: 'load'
+    waitUntil: ['load', 'networkidle2']
   })
   // 找到文字对应nav
   const navIndex = await page.evaluate(text => {
@@ -144,12 +144,15 @@ async function getPic(path, text, webPageURL) {
     })
   }, text);
 
-  if (navIndex !== 0) {
-    // 点击nav显示商品列表
-    await page.click(`.app-menu li:nth-child(${navIndex + 1})`)
-    // 等待图片加载完成
-    await page.waitForResponse(response => response.url().includes('aborder'));
-  }
+  // 点击nav显示商品列表
+  console.log('text:' + text);
+  console.log('navIndex:' + navIndex);
+  await page.click(`.app-menu li:nth-child(${navIndex + 1})`)
+  // 等待图片加载完成
+  // await page.waitForResponse(response => response.url().includes('aborder'));
+  await page.waitForNavigation({
+    waitUntil: 'networkidle0'
+  })
 
   await page.screenshot({
     path,
