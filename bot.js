@@ -10,6 +10,7 @@ const devices = require('puppeteer/DeviceDescriptors')
 const iPhonex = devices['iPhone X']
 const request = require('request-promise')
 const serverChanURL = 'http://sc.ftqq.com/SCU38429T43c27922fdf539ec0a9791d088c10f4f5c273333a8114.send'
+
 let userArr = [{
   alias: 'self',
   room: '测试群',
@@ -76,7 +77,7 @@ let omallTop = {
 // 定时任务
 function cornHandler() {
   new CronJob(
-    '30 * * * * *',
+    '0 0 9,12,18,20 * * *',
     function () {
       const omallTopKeys = Object.keys(omallTop)
       const message = {
@@ -94,12 +95,8 @@ function cornHandler() {
 
 // 处理消息指令
 async function messageHandler(message, user) {
-  console.log('messageHandler开始');
   const messageText = message.text()
-  console.log(messageText);
-  console.log(Object.keys(omallTop).find(obj => omallTop[obj].matchMsg === messageText));
   let page = omallTop[Object.keys(omallTop).find(obj => omallTop[obj].matchMsg === messageText)]
-  console.log(page);
   if (page) {
     // 获取群
     const omall_room = await bot.Room.find({
@@ -107,12 +104,9 @@ async function messageHandler(message, user) {
     })
     await getPic(page.imgURL, messageText, user.webPageURL)
     const img = await FileBox.fromFile(page.imgURL);
-    console.log("发送图片");
-    return
     await omall_room.say(img).catch(err => {
       console.log(err);
     })
-    console.log("发送图片结束");
     await omall_room.say("洋葱热卖榜单：" + user.webPageURL)
   } else if (messageText === ' 帮助') {
     const helpInfo = Object.values(omallTop).reduce((x, y) => {
@@ -122,12 +116,10 @@ async function messageHandler(message, user) {
   } else {
     return
   }
-  console.log('messageHandler结束');
 }
 
 // 获取截图
 async function getPic(path, text, webPageURL) {
-  console.log('getPic开始');
   const browser = await puppeteer.launch({
     // headless: false
     executablePath: "./puppeteer/chrome-win/chrome.exe"
@@ -135,7 +127,7 @@ async function getPic(path, text, webPageURL) {
   const page = await browser.newPage()
   await page.emulate(iPhonex)
   await page.goto(webPageURL, {
-    waitUntil: ['load', 'networkidle2']
+    waitUntil: 'networkidle0'
   })
   // 找到文字对应nav
   const navIndex = await page.evaluate(text => {
@@ -145,14 +137,9 @@ async function getPic(path, text, webPageURL) {
   }, text);
 
   // 点击nav显示商品列表
-  console.log('text:' + text);
-  console.log('navIndex:' + navIndex);
   await page.click(`.app-menu li:nth-child(${navIndex + 1})`)
   // 等待图片加载完成
-  // await page.waitForResponse(response => response.url().includes('aborder'));
-  await page.waitForNavigation({
-    waitUntil: 'networkidle0'
-  })
+  await page.waitFor(4000)
 
   await page.screenshot({
     path,
@@ -166,7 +153,6 @@ async function getPic(path, text, webPageURL) {
     }
   })
   await browser.close()
-  console.log('getPic结束');
 }
 // 发送警告到手机
 async function sendMessage(title, content) {
@@ -187,14 +173,13 @@ function RandomNumBoth(Min, Max) {
   return num;
 }
 
-// process.on('uncaughtException', async function (error) {
-//   console.error('uncaughtException', error);
-//   await sendMessage('uncaughtException', error.message)
-//   process.exit(1);
-// });
-// 当没有对 Promise 的 rejection 进行处理就会抛出这个事件（这只对原生 Promise 有效）
-// process.on('unhandledRejection', async function (error) {
-//   console.error('unhandledRejection', error);
-//   await sendMessage('unhandledRejection', error.message)
-//   process.exit(1);
-// });
+process.on('uncaughtException', async function (error) {
+  console.error('uncaughtException', error);
+  await sendMessage('uncaughtException', error.message)
+  process.exit(1);
+});
+process.on('unhandledRejection', async function (error) {
+  console.error('unhandledRejection', error);
+  await sendMessage('unhandledRejection', error.message)
+  process.exit(1);
+});
