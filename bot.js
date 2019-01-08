@@ -77,8 +77,7 @@ let omallTop = {
 function cornHandler() {
   new CronJob(
     '30 * * * * *',
-    function ()
-    {
+    function () {
       const omallTopKeys = Object.keys(omallTop)
       const message = {
         text() {
@@ -94,8 +93,7 @@ function cornHandler() {
 }
 
 // 处理消息指令
-async function messageHandler (message, user)
-{
+async function messageHandler(message, user) {
   console.log('messageHandler开始');
   const messageText = message.text()
   console.log(messageText);
@@ -110,8 +108,8 @@ async function messageHandler (message, user)
     await getPic(page.imgURL, messageText, user.webPageURL)
     const img = await FileBox.fromFile(page.imgURL);
     console.log("发送图片");
-    await omall_room.say(img).catch(err =>
-    { 
+    return
+    await omall_room.say(img).catch(err => {
       console.log(err);
     })
     console.log("发送图片结束");
@@ -128,8 +126,7 @@ async function messageHandler (message, user)
 }
 
 // 获取截图
-async function getPic (path, text, webPageURL)
-{
+async function getPic(path, text, webPageURL) {
   console.log('getPic开始');
   const browser = await puppeteer.launch({
     // headless: false
@@ -138,7 +135,7 @@ async function getPic (path, text, webPageURL)
   const page = await browser.newPage()
   await page.emulate(iPhonex)
   await page.goto(webPageURL, {
-    waitUntil: 'networkidle0'
+    waitUntil: 'load'
   })
   // 找到文字对应nav
   const navIndex = await page.evaluate(text => {
@@ -157,11 +154,12 @@ async function getPic (path, text, webPageURL)
   await page.screenshot({
     path,
     type: 'jpeg',
+    quality: 50,
     clip: {
       x: 0,
       y: 290,
       width: 375.2,
-      height: 3800 // 图片不能大于1M
+      height: 5000 // 图片不能大于1M
     }
   })
   await browser.close()
