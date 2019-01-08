@@ -24,7 +24,7 @@ let omallTop = {
   hotSalesPage: {
     matchMsg: ' 每周',
     imgURL: 'hotSales.jpeg'
-  }
+  },
   beautyPage: {
     matchMsg: ' 美护',
     imgURL: 'beauty.jpeg'
@@ -77,7 +77,8 @@ let omallTop = {
 function cornHandler() {
   new CronJob(
     '0 0 9,12,18,20 * * *',
-    function () {
+    function ()
+    {
       const omallTopKeys = Object.keys(omallTop)
       const message = {
         text() {
@@ -102,7 +103,8 @@ async function messageHandler(message, user) {
     })
     await getPic(page.imgURL, message.text(), user.webPageURL)
     const img = await FileBox.fromFile(page.imgURL);
-    await omall_room.say(img).catch(err => {
+    await omall_room.say(img).catch(err =>
+    { 
       console.log(err);
     })
     await omall_room.say("洋葱热卖榜单：" + user.webPageURL)
@@ -136,7 +138,7 @@ async function getPic(path, text, webPageURL) {
 
   if (navIndex !== 0) {
     // 点击nav显示商品列表
-    await page.click('.app-menu li:nth-child(' + navIndex + 1 ')')
+    await page.click(`.app-menu li:nth-child(${navIndex + 1})`)
     // 等待图片加载完成
     await page.waitForResponse(response => response.url().includes('aborder'));
   }
