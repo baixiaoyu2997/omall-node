@@ -76,7 +76,7 @@ let omallTop = {
 // 定时任务
 function cornHandler() {
   new CronJob(
-    '0 0 9,12,18,20 * * *',
+    '30 * * * * *',
     function ()
     {
       const omallTopKeys = Object.keys(omallTop)
@@ -94,7 +94,9 @@ function cornHandler() {
 }
 
 // 处理消息指令
-async function messageHandler(message, user) {
+async function messageHandler (message, user)
+{
+  console.log('messageHandler开始');
   let page = omallTop[Object.keys(omallTop).find(obj => omallTop[obj].matchMsg === message.text())]
   if (page) {
     // 获取群
@@ -103,10 +105,12 @@ async function messageHandler(message, user) {
     })
     await getPic(page.imgURL, message.text(), user.webPageURL)
     const img = await FileBox.fromFile(page.imgURL);
+    console.log("发送图片");
     await omall_room.say(img).catch(err =>
     { 
       console.log(err);
     })
+    console.log("发送图片结束");
     await omall_room.say("洋葱热卖榜单：" + user.webPageURL)
   } else if (message.text() === ' 帮助') {
     const helpInfo = Object.values(omallTop).reduce((x, y) => {
@@ -116,10 +120,13 @@ async function messageHandler(message, user) {
   } else {
     return
   }
+  console.log('messageHandler结束');
 }
 
 // 获取截图
-async function getPic(path, text, webPageURL) {
+async function getPic (path, text, webPageURL)
+{
+  console.log('getPic开始');
   const browser = await puppeteer.launch({
     // headless: false
     executablePath: "./puppeteer/chrome-win/chrome.exe"
@@ -154,6 +161,7 @@ async function getPic(path, text, webPageURL) {
     }
   })
   await browser.close()
+  console.log('getPic结束');
 }
 // 发送警告到手机
 async function sendMessage(title, content) {
@@ -174,14 +182,14 @@ function RandomNumBoth(Min, Max) {
   return num;
 }
 
-process.on('uncaughtException', async function (error) {
-  console.error('uncaughtException', error);
-  await sendMessage('uncaughtException', error.message)
-  process.exit(1);
-});
+// process.on('uncaughtException', async function (error) {
+//   console.error('uncaughtException', error);
+//   await sendMessage('uncaughtException', error.message)
+//   process.exit(1);
+// });
 // 当没有对 Promise 的 rejection 进行处理就会抛出这个事件（这只对原生 Promise 有效）
-process.on('unhandledRejection', async function (error) {
-  console.error('unhandledRejection', error);
-  await sendMessage('unhandledRejection', error.message)
-  process.exit(1);
-});
+// process.on('unhandledRejection', async function (error) {
+//   console.error('unhandledRejection', error);
+//   await sendMessage('unhandledRejection', error.message)
+//   process.exit(1);
+// });
